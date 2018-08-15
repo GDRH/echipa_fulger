@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>WebSocket demo</title>
+    </head>
+    <body>
+		 <canvas id="myCanvas" width="512" height="512"></canvas>
+
+        <script>
+		
+            var ws = new WebSocket("ws://192.168.137.251:5678/"),
+                messages = document.createElement('ul');
+            ws.onmessage = function (event) {
+                var messages = document.getElementsByTagName('ul')[0],
+                    message = document.createElement('li'),
+                    content = document.createTextNode(event.data);
+                message.appendChild(content);
+                messages.appendChild(message);
+            };
+            document.body.appendChild(messages);
+
+			
+			
+			function Playbutton(top, left, width, height, col) {
+			context.beginPath();
+			if ( col == 'red' )
+				context.fillStyle = 'rgba(225,0,0,1)';
+			if ( col == 'green' )
+				context.fillStyle = 'rgba(0,255,0,1)';
+			if ( col == 'blue' )
+				context.fillStyle = 'rgba(0,0,255,1)';
+			context.fillRect(top,left,width,height);
+			context.closePath();
+		  }
+			
+			
+			//Function to get the mouse position
+			function getMousePos(canvas, event) {
+				var rect = canvas.getBoundingClientRect();
+				return {
+					x: event.clientX - rect.left,
+					y: event.clientY - rect.top
+				};
+			}
+			//Function to check whether a point is inside a rectangle
+			function isInside(pos, rect){
+				return pos.x > rect.x && pos.x < rect.x+rect.width && pos.y < rect.y+rect.height && pos.y > rect.y
+			}
+
+			var canvas = document.getElementById('myCanvas');
+			var context = canvas.getContext('2d');
+			
+			
+			var buttons = {}
+			
+			for ( i = 0; i < 8; i++ ){
+				buttons[i] = {};
+			}
+			
+			buttons[0].rect = { x: 64, y: 0, width:64, height:64 }; // forward
+			buttons[1].rect = { x: 0, y: 64, width:64, height:64 }; // left 
+			buttons[2].rect = { x: 128, y: 64, width:64, height:64 }; // right
+			buttons[3].rect = { x: 64, y: 128, width:64, height:64 }; // back
+			buttons[4].rect = { x: 64, y: 64, width:64, height:64 }; // stop
+			
+			buttons[5].rect = { x: 0, y: 256, width:64, height:64 }; // stop
+			buttons[6].rect = { x: 64, y: 256, width:64, height:64 }; // stop
+			buttons[7].rect = { x: 128, y: 256, width:64, height:64 }; // stop
+			
+			var directions = [ 'f', 'l', 'r', 'b', 's', 'x', 'y', 'z' ];
+			
+			
+			for ( i = 0; i < 5; i++ ){
+				var drawrect = buttons[i].rect;
+				Playbutton(drawrect.x,drawrect.y,drawrect.width,drawrect.height, 'red');
+			}
+			Playbutton(buttons[5].rect.x,buttons[5].rect.y,buttons[5].rect.width,buttons[5].rect.height, 'red');
+			Playbutton(buttons[6].rect.x,buttons[6].rect.y,buttons[6].rect.width,buttons[6].rect.height, 'green');
+			Playbutton(buttons[7].rect.x,buttons[7].rect.y,buttons[7].rect.width,buttons[7].rect.height, 'blue');
+			
+
+			//Binding the click event on the canvas
+			canvas.addEventListener('click', function(evt) {
+				var mousePos = getMousePos(canvas, evt);
+				
+				for ( i = 0; i < 8; i++ ){
+					if (isInside(mousePos,buttons[i].rect)) {
+						ws.send(directions[i]);
+					}
+				}
+				
+				
+			}, false);
+
+        </script>
+    </body>
+</html>
