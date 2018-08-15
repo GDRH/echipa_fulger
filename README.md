@@ -1,0 +1,1 @@
+# echipa_fulger
